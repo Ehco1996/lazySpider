@@ -13,7 +13,7 @@ class LazyHeaders(object):
     """
     将requests headers <str> 格式化为对应的dict
     返回一个转换后的heaers
-    :param raw_str: str form chrome dev tools . Copy request headers
+    :param raw_str: str form chrome dev tools -> Copy request headers / Copy as cURL
     Usage::
       >>> from lazyspider import lazyheaders
       >>> lzay = LazyHeaders(raw_str)  
