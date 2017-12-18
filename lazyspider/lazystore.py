@@ -54,7 +54,7 @@ class LazyMysql():
         Args:
             sql: sql 语句 str
         return:
-            成功： [dict] 保存的记录            
+            成功： 查询的结果            
             失败： -1 并打印返回报错信息 
         '''
         try:
@@ -77,7 +77,7 @@ class LazyMysql():
             table: 表名字 str
             data:  记录 dict
         return:
-            成功： dict 保存的记录
+            成功： 1
             失败： -1 并打印返回报错信息            
         每条记录都以一个字典的形式传进来
         '''
@@ -90,7 +90,7 @@ class LazyMysql():
         datas = {}
         for k, v in data.items():
             # 防止sql注入
-            datas.update({k: pymysql.escape_string(v)})
+            datas.update({k: pymysql.escape_string(str(v))})
         for d in datas:
             fields += "`{}`,".format(str(d))
             values += "'{}',".format(str(datas[d]))
@@ -105,8 +105,32 @@ class LazyMysql():
                 # 执行语句
                 cursor.execute(sql)
                 self.con.commit()
-                res = cursor.fetchone()
-                return res
+                return 1
+        except Exception as e:
+            print(e)
+            return -1
+        finally:
+            self.close()
+
+    def delete_by_field(self, table, field, field_value):
+        '''
+        从数据库里删除指定条件的记录
+        Args:
+            table: 表名字 str
+            field: 字段名
+            field_value: 字段值
+        return:
+            成功： 1 
+            失败： -1 并打印返回报错信息                      
+        '''
+        try:
+            self.connect()
+            with self.con.cursor() as cursor:
+                sql = "delete from {} where {} = '{}'".format(
+                    table, field, field_value)
+                cursor.execute(sql)
+                self.con.commit()
+                return 1
         except Exception as e:
             print(e)
             return -1
@@ -133,7 +157,7 @@ class LazyMysql():
         updates = ''
         for k, v in data.items():
             # 防止sql注入
-            datas.update({k: pymysql.escape_string(v)})
+            datas.update({k: pymysql.escape_string(str(v))})
         for d in datas:
             if d == field:
                 field_value = str(datas[d])
@@ -157,7 +181,7 @@ class LazyMysql():
         finally:
             self.close()
 
-    def find_all(self, table, limit):
+    def find_all(self, table, limit=10):
         '''
         从数据库里查询所有记录
         Args:
@@ -231,4 +255,3 @@ class LazyMysql():
             return -1
         finally:
             self.close()
-
