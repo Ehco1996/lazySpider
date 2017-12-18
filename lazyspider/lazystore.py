@@ -137,15 +137,15 @@ class LazyMysql():
         finally:
             self.close()
 
-    def update_one_data(self, data, table, field):
+    def update_by_id(self, data, table, id_value):
         '''
-        将一条记录更新到数据库
+        通过id更新记录
         Args:
             table: 表名字 str
             data:  记录 dict
-            field: 用于检索更新的唯一字段 列如Id
+            id_value: id值
         return:
-            成功： 更新记录的id
+            成功： １
             失败： -1 并打印返回报错信息
         每条记录都以一个字典的形式传进来
         '''
@@ -159,22 +159,19 @@ class LazyMysql():
             # 防止sql注入
             datas.update({k: pymysql.escape_string(str(v))})
         for d in datas:
-            if d == field:
-                field_value = str(datas[d])
             updates += "{}='{}',".format(str(d), str(datas[d]))
-        if len(updates) <= 0 or field_value == None:
+        if len(updates) <= 0:
             return -1
         # 生成sql语句
-        sql = "update {} set {} where {} = '{}'".format(
-            table, updates[:-1], field, field_value)
+        sql = "update {} set {} where id = '{}'".format(
+            table, updates[:-1], str(id_value))
         try:
             self.connect()
             with self.con.cursor() as cursor:
                 # 执行语句
                 cursor.execute(sql)
                 self.con.commit()
-                res = cursor.fetchone()
-                return cursor.rownumber
+                return 1
         except Exception as e:
             print(e)
             return -1
