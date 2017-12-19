@@ -1,6 +1,6 @@
 '''
 lazyspider.lazyheades
-str -> dict 
+str -> dict
 ~~~~~~~~~~~~~~~~~~~~~
 
 将header字符串转换为字典格式
@@ -13,10 +13,10 @@ class LazyHeaders(object):
     """
     将requests headers <str> 格式化为对应的dict
     返回一个转换后的heaers
-    :param raw_str: str form chrome dev tools -> Copy request headers / Copy as cURL
+    :param cRUL_str: str form chrome dev tools ->  Copy as cURL
     Usage::
       >>> from lazyspider import lazyheaders
-      >>> lzay = LazyHeaders(raw_str)  
+      >>> lzay = LazyHeaders(raw_str)
       >>> headers = lzay.getHeaders()
       >>> cookies = lazy.getCookies()
       >>> r = requests.get(url,headers=headers, cookies=cookies)
@@ -26,11 +26,8 @@ class LazyHeaders(object):
         '''
         判断输入的字符串是request headers 还是 curl
         '''
-        if '\n' in raw_str:
-            self.data = self._stripStr(raw_str, ' ').split('\n')
-        elif '-H' in raw_str:
-            self.data = self._stripStrList(
-                raw_str, ['"', ' ', "'"]).split('-H')
+        self.data = self._stripStrList(
+            raw_str, [' ', "'"]).split('-H')
 
     def _stripStr(self, raw_str, stop_str):
         '''
@@ -62,25 +59,39 @@ class LazyHeaders(object):
         else:
             raise Exception('stop_words must be list!')
 
+    def _judeNOtIn(self, raw_str, ele_list):
+        '''
+        判断ele是否在原始字符串中
+        args：
+            raw_str 源字符串
+            ele_list  待检查的列表
+        return
+            boolean
+        '''
+        for ele in ele_list:
+            if ele in raw_str:
+                return False
+        return True
+
     def getCookies(self):
         '''
         从字符串中格式化出字典形式的Cookies
         '''
         items = self.data
         for item in items:
-            if item[:6] == 'Cookie':
+            if 'cookie' in item or 'Cookie' in item:
                 cookies = SimpleCookie(item[7:])
                 return {i.key: i.value for i in cookies.values()}
-        return cookies
+        return {}
 
     def getHeaders(self):
         '''
         从字符串中格式化出字典形式的Headers
         '''
-        raw_headers = self.data
+        items = self.data
         headers = {}
-        for item in raw_headers:
-            if len(item) > 0 and item[:4] != 'curl' and item[:3] != 'GET' and item[:6] != 'Cookie':
+        for item in items:
+            if len(item) > 0 and self._judeNOtIn(item, ['curl', 'GET', 'Cookie', 'cookie']):
                 sp = item.split(':')
                 headers[sp[0]] = sp[1]
         return headers
