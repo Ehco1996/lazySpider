@@ -54,8 +54,8 @@ class LazyMysql():
         Args:
             sql: sql 语句 str
         return:
-            成功： 查询的结果            
-            失败： -1 并打印返回报错信息 
+            成功： 查询的结果
+            失败： -1 并打印返回报错信息
         '''
         try:
             self.connect()
@@ -78,7 +78,7 @@ class LazyMysql():
             data:  记录 dict
         return:
             成功： 1
-            失败： -1 并打印返回报错信息            
+            失败： -1 并打印返回报错信息
         每条记录都以一个字典的形式传进来
         '''
         key_map = {}
@@ -99,18 +99,8 @@ class LazyMysql():
         # 生成sql语句
         sql = "insert ignore into {}({}) values({})".format(
             table, fields[:-1], values[:-1])
-        try:
-            self.connect()
-            with self.con.cursor() as cursor:
-                # 执行语句
-                cursor.execute(sql)
-                self.con.commit()
-                return 1
-        except Exception as e:
-            print(e)
-            return -1
-        finally:
-            self.close()
+        res = self.query(sql)
+        return 1 if res != -1 else res
 
     def delete_by_field(self, table, field, field_value):
         '''
@@ -120,22 +110,14 @@ class LazyMysql():
             field: 字段名
             field_value: 字段值
         return:
-            成功： 1 
-            失败： -1 并打印返回报错信息                      
+            成功： 1
+            失败： -1 并打印返回报错信息
         '''
-        try:
-            self.connect()
-            with self.con.cursor() as cursor:
-                sql = "delete from {} where {} = '{}'".format(
-                    table, field, field_value)
-                cursor.execute(sql)
-                self.con.commit()
-                return 1
-        except Exception as e:
-            print(e)
-            return -1
-        finally:
-            self.close()
+
+        sql = "delete from {} where {} = '{}'".format(
+            table, field, field_value)
+        res = self.query(sql)
+        return 1 if res != -1 else res
 
     def update_by_id(self, data, table, id_value):
         '''
@@ -165,18 +147,8 @@ class LazyMysql():
         # 生成sql语句
         sql = "update {} set {} where id = '{}'".format(
             table, updates[:-1], str(id_value))
-        try:
-            self.connect()
-            with self.con.cursor() as cursor:
-                # 执行语句
-                cursor.execute(sql)
-                self.con.commit()
-                return 1
-        except Exception as e:
-            print(e)
-            return -1
-        finally:
-            self.close()
+        res = self.query(sql)
+        return 1 if res != -1 else res
 
     def find_all(self, table, limit=10):
         '''
@@ -186,20 +158,11 @@ class LazyMysql():
             limit: 限制数量
         return:
             成功： [dict] 保存的记录
-            失败： -1 并打印返回报错信息            
+            失败： -1 并打印返回报错信息
         '''
-        try:
-            self.connect()
-            with self.con.cursor() as cursor:
-                sql = "select * from {} limit 0,{}".format(table, limit)
-                cursor.execute(sql)
-                res = cursor.fetchall()
-                return res
-        except Exception as e:
-            print(e)
-            return -1
-        finally:
-            self.close()
+        sql = "select * from {} limit 0,{}".format(table, limit)
+        res = self.query(sql)
+        return res
 
     def find_by_field(self, table, field, field_value):
         '''
@@ -210,21 +173,12 @@ class LazyMysql():
             field_value: 字段值
         return:
             成功： [dict] 保存的记录
-            失败： -1 并打印返回报错信息                      
+            失败： -1 并打印返回报错信息
         '''
-        try:
-            self.connect()
-            with self.con.cursor() as cursor:
-                sql = "select * from {} where {} = '{}'".format(
-                    table, field, field_value)
-                cursor.execute(sql)
-                res = cursor.fetchall()
-                return res
-        except Exception as e:
-            print(e)
-            return -1
-        finally:
-            self.close()
+        sql = "select * from {} where {} = '{}'".format(
+            table, field, field_value)
+        res = self.query(sql)
+        return res
 
     def find_by_fields(self, table, queryset={}):
         '''
@@ -236,19 +190,10 @@ class LazyMysql():
             成功： [dict] 保存的记录
             失败： -1 并打印返回报错信息                      
         '''
-        try:
-            self.connect()
-            with self.con.cursor() as cursor:
-                querys = ""
-                for k, v in queryset.items():
-                    querys += "{} = '{}' and ".format(k, v)
-                sql = "select * from {} where {} ".format(
-                    table, querys[:-4])
-                cursor.execute(sql)
-                res = cursor.fetchall()
-                return res
-        except Exception as e:
-            print(e)
-            return -1
-        finally:
-            self.close()
+        querys = ""
+        for k, v in queryset.items():
+            querys += "{} = '{}' and ".format(k, v)
+        sql = "select * from {} where {} ".format(
+            table, querys[:-4])
+        res = self.query(sql)
+        return res
