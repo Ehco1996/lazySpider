@@ -1,6 +1,6 @@
 from setuptools import setup
 
-VERSION = '0.0.2'
+VERSION = '0.0.3'
 URL = 'https://github.com/Ehco1996/lazySpider'
 KEYWORDS = 'spider headers mysql'
 EMAIL = 'zh19960202@gmial.com'
