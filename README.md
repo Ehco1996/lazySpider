@@ -30,7 +30,7 @@ lazyspider 并不是一个爬虫框架
 仅支持py3~
 
 ```bash
-pip install lazyspier
+pip install lazyspider
 ```
 
 ### 使用说明
